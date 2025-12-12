@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Admin Panel - YourBodyScrub</title>
+<style>
+    body { font-family: Arial; background:#f6f6f6; margin:0; }
+    .box {
+        width:350px; background:white; padding:20px;
+        margin:80px auto; border-radius:10px;
+        box-shadow:0 0 10px rgba(0,0,0,0.1);
+    }
+    input { width:100%; padding:10px; margin:10px 0; }
+    button {
+        width:100%; padding:10px;
+        background:#FF6B81; border:none; color:white;
+        font-weight:bold; cursor:pointer; border-radius:8px;
+    }
+    button:hover { background:#ff506c; }
+    table { width:100%; border-collapse:collapse; margin-top:20px; }
+    table th, table td { padding:10px; border-bottom:1px solid #ddd; }
+    select { padding:5px; }
+</style>
+</head>
+<body>
+
+<div id="loginBox" class="box">
+    <h2>Login Admin</h2>
+    <input id="username" placeholder="Username">
+    <input id="password" type="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+</div>
+
+<div id="adminPanel" style="display:none;" class="box">
+    <h2>Dashboard Admin</h2>
+
+    <h3>📦 Stok Produk</h3>
+    <table id="stockTable"></table>
+
+    <h3>🧾 Daftar Pesanan</h3>
+    <table id="orderTable"></table>
+
+    <br>
+    <button onclick="logout()">Logout</button>
+</div>
+
+<script>
+// ============ LOGIN SYSTEM ============
+const ADMIN_USER = "admin";
+const ADMIN_PASS = "12345";  // bisa kamu ubah
+
+function login(){
+    let u = document.getElementById("username").value;
+    let p = document.getElementById("password").value;
+
+    if(u === ADMIN_USER && p === ADMIN_PASS){
+        localStorage.setItem("adminLogin", "true");
+        loadAdmin();
+    } else {
+        alert("Username atau password salah!");
+    }
+}
+
+function logout(){
+    localStorage.removeItem("adminLogin");
+    location.reload();
+}
+
+function loadAdmin(){
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("adminPanel").style.display = "block";
+
+    loadStock();
+    loadOrders();
+}
+
+if(localStorage.getItem("adminLogin") === "true"){
+    loadAdmin();
+}
+
+// ============ STOCK SYSTEM ============
+let products = JSON.parse(localStorage.getItem("productsStock")) || [
+    {name:"Coconut", stock:10},
+    {name:"Aloe Vera", stock:8},
+    {name:"Strawberry", stock:12},
+    {name:"Green Tea", stock:9},
+    {name:"Bengkoang", stock:11},
+    {name:"Avocado", stock:7},
+    {name:"Rose", stock:5}
+];
+
+function saveStock(){
+    localStorage.setItem("productsStock", JSON.stringify(products));
+}
+
+function loadStock(){
+    let html = `
+        <tr><th>Produk</th><th>Stok</th><th>Aksi</th></tr>
+    `;
+    products.forEach((p,i)=>{
+        html += `
+        <tr>
+            <td>${p.name}</td>
+            <td><input type="number" value="${p.stock}" id="stock_${i}" style="width:60px;"></td>
+            <td><button onclick="updateStock(${i})">Update</button></td>
+        </tr>`;
+    });
+    document.getElementById("stockTable").innerHTML = html;
+}
+
+function updateStock(i){
+    let newStock = document.getElementById("stock_"+i).value;
+    products[i].stock = parseInt(newStock);
+    saveStock();
+    alert("Stok berhasil diperbarui!");
+}
+
+// ============ ORDER SYSTEM ============
+let orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+function loadOrders(){
+    let html = `
+        <tr><th>Nama</th><th>No WA</th><th>Alamat</th><th>Produk</th><th>Status</th></tr>
+    `;
+    orders.forEach((o,i)=>{
+        let list = o.items.map(a=>"- "+a).join("<br>");
+
+        html += `
+        <tr>
+            <td>${o.name}</td>
+            <td>${o.wa}</td>
+            <td>${o.address}</td>
+            <td>${list}</td>
+            <td>
+                <select onchange="updateStatus(${i}, this.value)">
+                    <option ${o.status==="Pending"?"selected":""}>Pending</option>
+                    <option ${o.status==="Diproses"?"selected":""}>Diproses</option>
+                    <option ${o.status==="Dikirim"?"selected":""}>Dikirim</option>
+                    <option ${o.status==="Selesai"?"selected":""}>Selesai</option>
+                </select>
+            </td>
+        </tr>`;
+    });
+
+    document.getElementById("orderTable").innerHTML = html;
+}
+
+function updateStatus(i, status){
+    orders[i].status = status;
+    localStorage.setItem("orders", JSON.stringify(orders));
+    alert("Status pesanan diperbarui!");
+}
+</script>
+
+</body>
+</html>

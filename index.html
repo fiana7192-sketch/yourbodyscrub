@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<title>YourBodyScrub - Natural Body Scrub</title>
+<style>
+    body {
+        margin:0;
+        font-family: Arial, sans-serif;
+        background:#f1f1f1;
+    }
+    header {
+        background:#FF6B81;
+        padding:20px;
+        color:white;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+    }
+    header h1 { margin:0; }
+    nav a {
+        color:white;
+        margin:0 15px;
+        text-decoration:none;
+        font-weight:bold;
+        cursor:pointer;
+    }
+    .container {
+        width:90%;
+        margin:auto;
+        margin-top:30px;
+    }
+    .products {
+        display:grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+        gap:20px;
+    }
+    .product {
+        background:white;
+        border-radius:10px;
+        padding:15px;
+        box-shadow:0 4px 10px rgba(0,0,0,0.1);
+        text-align:center;
+    }
+    .product img {
+        width:100%;
+        border-radius:10px;
+    }
+    button {
+        background:#FF6B81;
+        color:white;
+        border:none;
+        padding:10px 15px;
+        border-radius:5px;
+        cursor:pointer;
+        margin-top:10px;
+    }
+    button:hover { background:#ff506c; }
+
+    /* POPUP */
+    #popup {
+        position:fixed;
+        top:20px;
+        right:20px;
+        background:#4CAF50;
+        color:white;
+        padding:15px 20px;
+        border-radius:8px;
+        display:none;
+        box-shadow:0 3px 6px rgba(0,0,0,0.2);
+    }
+
+    /* KERANJANG */
+    #cartPage, #checkoutPage, #aboutPage {
+        display:none;
+    }
+    table {
+        width:100%;
+        border-collapse:collapse;
+    }
+    table th, table td {
+        padding:10px;
+        border-bottom:1px solid #ddd;
+    }
+    .deleteBtn {
+        background:#d9534f;
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>YourBodyScrub</h1>
+    <nav>
+        <a onclick="showPage('home & our product')">Home & Our Product</a>
+        <a onclick="showPage('about')">About Us</a>
+        <a onclick="showPage('cart')">Keranjang 🛒 (<span id='cartCount'>0</span>)</a>
+        <a href="admin.html" style="position:fixed;bottom:20px;right:20px;background:#e616db;color:white;padding:10px 15px;border-radius:8px;text-decoration:none;font-size:14px;">Admin</a>
+       
+    </nav>
+        
+</header>
+
+<div id="popup">Produk ditambahkan ke keranjang!</div>
+<div onclick="showPage('admin.html')" 
+style="
+margin-top:25px;
+padding:15px;
+background:white;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
+cursor:pointer;
+text-align:center;
+font-weight:bold;">
+<div id="href:admin.html"></div>
+</div>
+
+
+<!-- HOME & OUR PRODUCT-->
+<div id="homePage" class="container">
+    <h2>Body Scrub Varian Premium</h2>
+    <div class="products" id="productList"></div>
+</div>
+
+<!-- ABOUT US -->
+<div id="aboutPage" class="container">
+    <h2>Tentang Kami</h2>
+    <p>
+        <b>YourBodyScrub</b> adalah brand lokal yang berfokus pada produk perawatan kulit berbahan alami.  
+        Kami menghadirkan berbagai varian body scrub premium dengan aroma menenangkan, tekstur lembut,  
+        dan kandungan alami yang mampu mencerahkan serta melembutkan kulit.  
+    </p>
+    <p>
+        Misi kami adalah membuat setiap orang merasakan pengalaman spa di rumah melalui bahan natural terbaik.
+    </p>
+</div>
+
+<!-- CART -->
+<div id="cartPage" class="container">
+    <h2>Keranjang Belanja</h2>
+    <table id="cartTable">
+        <tr>
+            <th>Produk</th>
+            <th>Harga</th>
+            <th>Aksi</th>
+        </tr>
+    </table>
+    <br>
+    <button onclick="showPage('checkout')">Checkout</button>
+</div>
+
+<!-- CHECKOUT -->
+<div id="checkoutPage" class="container">
+    <h2>Checkout</h2>
+    <label>Nama Pembeli:</label><br>
+    <input id="buyerName" style="width:100%;padding:10px;"><br><br>
+
+    <label>No WA:</label><br>
+    <input id="buyerWA" style="width:100%;padding:10px;"><br><br>
+
+    <label>Alamat Pembeli:</label><br>
+    <textarea id="buyerAddress" style="width:100%;padding:10px;" rows="4"></textarea><br><br>
+
+    <button onclick="sendOrder()">Kirim Pesanan via WhatsApp</button>
+</div>
+
+<script>
+// DATA PRODUK
+const products = 
+[
+    {name:"Coconut", price:35000, desc:"Kelembutan kelapa alami untuk kulit lebih lembab dan halus.", img:"aset/WhatsApp Image 2025-12-01 at 13.03.59.jpeg"},
+    {name:"Aloe Vera", price:35000, desc:"Menenangkan kulit iritasi dan membuatnya tetap segar.", img:"aset/aloe vera.jpeg"},
+    {name:"Strawberry", price:35000, desc:"Wangi manis menyegarkan membantu mencerahkan kulit.", img:"aset/strawberry.jpeg"},
+    {name:"Green Tea", price:35000, desc:"Antioksidan tinggi menjaga kulit tetap sehat dan glowing.", img:"aset/green tea.jpeg"},
+    {name:"Bengkoang", price:35000, desc:"Pencerah alami membuat kulit tampak lebih cerah alami.", img:"aset/bengkoang.jpeg"},
+    {name:"Avocado", price:35000, desc:"Lembut dan melembapkan, cocok untuk kulit kering.", img:"aset/avocado.jpeg"},
+    {name:"Rose", price:35000, desc:"Aroma bunga mawar mewah untuk pengalaman spa yang elegan.", img:"aset/rose.jpeg"}
+];
+
+let cart = [];
+
+// TAMPILKAN PRODUK
+function loadProducts() {
+    let html = "";
+    products.forEach((p,i)=>{
+        html += `
+            <div class="product">
+                <img src="${p.img}">
+                <h3>${p.name}</h3>
+                <p>${p.desc}</p>
+                <b>Rp ${p.price.toLocaleString()}</b><br>
+                <button onclick="addToCart(${i})">Tambah ke Keranjang</button>
+            </div>
+        `;
+    });
+    document.getElementById("productList").innerHTML = html;
+}
+loadProducts();
+
+// ADD TO CART + POPUP
+function addToCart(index) {
+    cart.push(products[index]);
+    updateCartCount();
+    showPopup();
+}
+
+// UPDATE JUMLAH KERANJANG
+function updateCartCount() {
+    document.getElementById("cartCount").innerText = cart.length;
+}
+
+// TAMPILKAN POPUP
+function showPopup() {
+    const popup = document.getElementById('popup');
+    popup.style.display = "block";
+    setTimeout(()=> popup.style.display="none", 1500);
+}
+
+// TAMPILKAN HALAMAN
+function showPage(page) {
+    document.getElementById("homePage").style.display = "none";
+    document.getElementById("aboutPage").style.display = "none";
+    document.getElementById("cartPage").style.display = "none";
+    document.getElementById("checkoutPage").style.display = "none";
+
+    if(page === "home") document.getElementById("homePage").style.display = "block";
+    if(page === "about") document.getElementById("aboutPage").style.display = "block";
+    if(page === "cart") { document.getElementById("cartPage").style.display = "block"; loadCart(); }
+    if(page === "checkout") document.getElementById("checkoutPage").style.display = "block";
+}
+
+// TAMPILKAN ISI KERANJANG
+function loadCart() {
+    let table = `
+        <tr><th>Produk</th><th>Harga</th><th>Aksi</th></tr>
+    `;
+    cart.forEach((item, index)=>{
+        table += `
+            <tr>
+                <td>${item.name}</td>
+                <td>Rp ${item.price.toLocaleString()}</td>
+                <td><button class="deleteBtn" onclick="deleteItem(${index})">Hapus</button></td>
+            </tr>
+        `;
+    });
+    document.getElementById("cartTable").innerHTML = table;
+}
+
+// HAPUS ITEM
+function deleteItem(i) {
+    cart.splice(i,1);
+    updateCartCount();
+    loadCart();
+}
+
+// KIRIM PESAN VIA WHATSAPP
+function sendOrder() {
+    let name = document.getElementById("buyerName").value;
+    let wa = document.getElementById("buyerWA").value;
+    let address = document.getElementById("buyerAddress").value;
+
+    if(!name || !wa || !address) {
+        alert("Lengkapi semua data pembeli!");
+        return;
+    }
+
+    // SIMPAN PESANAN KE ADMIN
+    let items = cart.map(c => c.name);
+    let orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+    orders.push({
+        name: name,
+        wa: wa,
+        address: address,
+        items: items,
+        status: "Pending"
+    });
+
+    localStorage.setItem("orders", JSON.stringify(orders));
+
+    // KIRIM VIA WA
+    let cartList = cart.map(c => `- ${c.name} (Rp ${c.price})`).join("%0A");
+    let message =
+        `Halo! Saya ingin memesan:%0A${cartList}%0A%0A` +
+        `Nama: ${name}%0ANo WA: ${wa}%0AAlamat: ${address}`;
+
+    window.open("https://wa.me/082113350004?text=" + message);
+
+    alert("Pesanan berhasil disimpan dan dikirim via WhatsApp!");
+
+    cart = [];
+    updateCartCount();
+}
+
+
+</script>
+
+</body>
+</html>
